@@ -1,0 +1,30 @@
+version: '3.8'
+
+networks:
+  frontend:
+    external: true
+
+services:
+  webscraper:
+    build: .
+    # ports:
+    #   - "5000:5000"
+    environment:
+      - SMTP_HOST=smtp.example.com
+      - SMTP_PORT=587
+      - SMTP_USER=your_email@example.com
+      - SMTP_PASS=your_password
+      - TO_EMAIL=your_email@example.com
+    volumes:
+      - ./scraper.db:/app/scraper.db
+    labels:
+      traefik.enable: true
+      traefik.http.routers.scraper.rule: Host(`scraper.jusenetwork.nl`)
+      traefik.http.routers.scraper.entrypoints: websecure
+      traefik.http.routers.scraper.tls: true
+      traefik.http.routers.scraper.tls.certresolver: production
+      traefik.http.routers.scraper.service: scraper-service
+      traefik.http.services.scraper-service.loadbalancer.server.port: 5000
+      com.centurylinklabs.watchtower.enable: false
+    networks:
+      - frontend
